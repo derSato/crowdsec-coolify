@@ -14,7 +14,7 @@ services:
     volumes:
       - /opt/traefik-logs:/var/log/traefik
       - ./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml
-      - ./crowdsec/appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml
+      - ./crowdsec/acquis.d/appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml
     environment:
       COLLECTIONS: >
         crowdsecurity/traefik
