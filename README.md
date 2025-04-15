@@ -45,6 +45,8 @@ Restart the Proxy
 
 ## 3. Install this Repository as a Docker Compose Project
 
+Point to this directory and install with /docker-compose.yaml
+
 
 
 
