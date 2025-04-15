@@ -1,8 +1,19 @@
-version: '3.8'
+version: "3.8"
 
-networks:
-  coolify:
-    external: true
+configs:
+  acquis.yaml:
+    content: |
+      filenames:
+        - /var/log/traefik/traefik.log
+      labels:
+        type: traefik
+  appsec.yaml:
+    content: |
+      appsec_config: crowdsecurity/appsec-default
+      labels:
+        type: appsec
+      listen_addr: 0.0.0.0:7422
+      source: appsec
 
 services:
   crowdsec:
@@ -13,18 +24,21 @@ services:
       - coolify
     volumes:
       - /opt/traefik-logs:/var/log/traefik
-      - ${PWD}/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml
-      - ${PWD}/crowdsec/appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml
+    configs:
+      - source: acquis.yaml
+        target: /etc/crowdsec/acquis.yaml
+      - source: appsec.yaml
+        target: /etc/crowdsec/acquis.d/appsec.yaml
     environment:
       COLLECTIONS: >
-        crowdsecurity/traefik
-        crowdsecurity/appsec-virtual-patching
-        crowdsecurity/appsec-generic-rules
+        crowdsecurity/traefik crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules
+
+
     security_opt:
       - no-new-privileges:true
     ports:
       # - "8081:8080"  # CrowdSec API (optional) 8080 is used by coolify-proxy
-      - "7422:7422"  # AppSec
+      - "7422:7422" # AppSec
 
   logrotate:
     image: blacklabelops/logrotate
@@ -33,3 +47,7 @@ services:
     volumes:
       - /opt/traefik-logs:/var/log/traefik
       - /opt/logrotate.d/traefik:/etc/logrotate.d/traefik:ro
+
+networks:
+  coolify:
+    external: true

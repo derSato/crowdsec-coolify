@@ -70,9 +70,7 @@ http:
           crowdsecLapiHost: crowdsec:8080
           crowdsecLapiScheme: http
           crowdsecMode: live
-
-
-
+          
           <!-- AppSec -->
           crowdsecAppsecEnabled: true
           crowdsecAppsecHost: crowdsec:7422
