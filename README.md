@@ -49,6 +49,11 @@ Point to this directory and install with /docker-compose.yaml
 
 
 
+## 4. Activate Dashboaard
+Within your containsers terminal
+```
+crowdsec cscli bouncers add traefik-bouncer --key-type api
+```
 
 ## 🧾 4. Create Traefik Dynamic Configuration (Middleware)
 
