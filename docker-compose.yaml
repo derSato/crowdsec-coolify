@@ -21,7 +21,7 @@ services:
         crowdsecurity/appsec-virtual-patching
         crowdsecurity/appsec-generic-rules
     ports:
-      - "8080:8080"  # CrowdSec API (optional)
+      # - "8081:8080"  # CrowdSec API (optional) 8080 is used by coolify-proxy
       - "7422:7422"  # AppSec
 
   logrotate:
