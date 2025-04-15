@@ -30,6 +30,6 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/traefik-logs:/var/log/traefik
-      - ./logrotate/logrotate.conf:/etc/logrotate.conf:ro
+      - ./logrotate/rotate.conf:/etc/logrotate.conf:ro
     environment:
       - LOGROTATE_INTERVAL=daily
