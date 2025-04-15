@@ -13,8 +13,8 @@ services:
       - coolify
     volumes:
       - /opt/traefik-logs:/var/log/traefik
-      - ./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml
-      # - ./crowdsec/appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml
+      - ${PWD}/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml
+      - ${PWD}/crowdsec/appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml
     environment:
       COLLECTIONS: >
         crowdsecurity/traefik
