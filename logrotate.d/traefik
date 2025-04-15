@@ -7,4 +7,7 @@
   missingok
   notifempty
   copytruncate
+  postrotate
+        docker kill --signal="USR1" coolify-proxy
+    endscript
 }
