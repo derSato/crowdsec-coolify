@@ -1,0 +1,35 @@
+version: '3.8'
+
+networks:
+  coolify:
+    external: true
+
+services:
+  crowdsec:
+    image: crowdsecurity/crowdsec
+    container_name: crowdsec
+    restart: unless-stopped
+    networks:
+      - coolify
+    volumes:
+      - /opt/traefik-logs:/var/log/traefik
+      - ./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml
+      - ./crowdsec/appsec.yaml:/etc/crowdsec/acquis.d/appsec.yaml
+    environment:
+      COLLECTIONS: >
+        crowdsecurity/traefik
+        crowdsecurity/appsec-virtual-patching
+        crowdsecurity/appsec-generic-rules
+    ports:
+      - "8080:8080"  # CrowdSec API (optional)
+      - "7422:7422"  # AppSec
+
+  logrotate:
+    image: blacklabelops/logrotate
+    container_name: logrotate
+    restart: unless-stopped
+    volumes:
+      - /opt/traefik-logs:/var/log/traefik
+      - ./logrotate/logrotate.conf:/etc/logrotate.conf
+    environment:
+      - LOGROTATE_INTERVAL=daily
