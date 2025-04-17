@@ -45,7 +45,7 @@ services:
     image: docker.io/fbonalair/traefik-crowdsec-bouncer:latest
     container_name: bouncer-traefik
     environment:
-      CROWDSEC_BOUNCER_API_KEY: YOUR_API_KEY
+      CROWDSEC_BOUNCER_API_KEY: ${CROWSEC_API_KEY}
       CROWDSEC_AGENT_HOST: crowdsec:8080
     networks:
       - coolify
