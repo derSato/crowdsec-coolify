@@ -1,20 +1,27 @@
 # Installation
+
 ## 🧱 1. Enable Full JSON Access Logs
+
 Add the following lines to your `Traefik Configuration` @Servers/Configuration file
 
 ```
    command:
       ...
-        - "--accesslog.filepath=/logs/traefik.log"
+        - "--accesslog.filepath=/var/log/traefik/access.log"
         - "--accesslog.format=json"
         - "--accesslog.filters.statusCodes=200-299,400-599"
         - "--accesslog.bufferingSize=0"
-        - "--accesslog.fields.headers.defaultMode=drop"
         - "--accesslog.fields.headers.names.User-Agent=keep"
+        - "--accesslog.fields.headers.names.Host=keep"
+        - "--accesslog.fields.headers.names.Content-Type=keep"
+        - "--accesslog.fields.headers.names.Referer=keep"
+        - "--accesslog.fields.headers.names.X-Forwarded-For=keep"
+        - "--accesslog.fields.request=keep"
+        - "--accesslog.fields.response=keep"
       ...
     volumes:
       ...
-         - './logs:/logs'
+         - 'logs:var/log/traefik'
 ```
 
 Test if the logs are created. SSH into your machiene and check with after restarting the proxy:
@@ -23,10 +30,9 @@ Test if the logs are created. SSH into your machiene and check with after restar
 nano /opt/traefik-logs/traefik.log
 ```
 
-
 ## 🔌 2. Enable CrowdSec Bouncer Plugin in Traefik
-Add the following lines to your `Traefik Configuration` @Servers/Configuration file.
-__Can be also done simoutaniously with step 1.__
+
+Add the following lines to your `Traefik Configuration` @Servers/Configuration file. **Can be also done simoutaniously with step 1.**
 
 ```
    command:
@@ -40,24 +46,23 @@ __Can be also done simoutaniously with step 1.__
 
 Restart the Proxy
 
-
-
-
 ## 3. Install this Repository as a Docker Compose Project
 
 Point to this directory and install with /docker-compose.yaml
 
-
-
 ## 4. Activate Dashboaard
-Within your containsers terminal
+
+WHile checking your logs you see the containers name. it should look something like [Coolify container name]-[Random numbers and letters] Optionally use 'docker ds' to find the container name with ssh. SSH into your machiene and run:
+
 ```
-crowdsec cscli bouncers add traefik-bouncer --key-type api
+docker exec -it [CONTAINER_NAME] cscli bouncers add traefik-bouncer
 ```
+
+This should return the API ket for 'traefik bouncer'
 
 ## 🧾 4. Create Traefik Dynamic Configuration (Middleware)
 
-Add the following lines to your `Traefik Dynamic Configuration` @Servers/Dynamic Configurations/Configuration file
+Now we add middleware to our Dynamic Traefik configuration.
 
 ```
 http:
@@ -70,8 +75,6 @@ http:
           crowdsecLapiHost: crowdsec:8080
           crowdsecLapiScheme: http
           crowdsecMode: live
-          
-          <!-- AppSec -->
           crowdsecAppsecEnabled: true
           crowdsecAppsecHost: crowdsec:7422
           crowdsecAppsecFailureBlock: true
@@ -81,17 +84,18 @@ http:
 🌐 4. Apply Middleware to All HTTPS Services (Globally)
 
 To globally enable CrowdSec for all requests, update your command: in Traefik:
+
 ```
 - "--entrypoints.https.http.middlewares=crowdsec@file"
 ```
+
 🧠 This applies the middleware on the https entryPoint — meaning all traffic routed via HTTPS will pass through CrowdSec first.
 
 Want to test on specific routers first instead? You can use labels like:
+
 ```
 labels:
   - "traefik.http.routers.myservice.middlewares=crowdsec@file"
-  ```
+```
 
-
-
-__Thats it!__
+**Thats it!**

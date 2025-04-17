@@ -4,7 +4,7 @@ configs:
   acquis.yaml:
     content: |
       filenames:
-        - /var/log/traefik/traefik.log
+        - /var/log/traefik/*
       labels:
         type: traefik
   appsec.yaml:
@@ -17,13 +17,15 @@ configs:
 
 services:
   crowdsec:
-    image: crowdsecurity/crowdsec
+    image: crowdsecurity/crowdsec:latest
     container_name: crowdsec
     restart: unless-stopped
     networks:
       - coolify
     volumes:
       - /opt/traefik-logs:/var/log/traefik
+      - crowdsec-db:/var/lib/crowdsec/data/
+      - crowdsec-config:/etc/crowdsec
     configs:
       - source: acquis.yaml
         target: /etc/crowdsec/acquis.yaml
@@ -33,12 +35,25 @@ services:
       COLLECTIONS: >
         crowdsecurity/traefik crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules
 
-
     security_opt:
       - no-new-privileges:true
     ports:
-      # - "8081:8080"  # CrowdSec API (optional) 8080 is used by coolify-proxy
+      - "8080:8080" # CrowdSec API
       - "7422:7422" # AppSec
+
+  bouncer-traefik:
+    image: docker.io/fbonalair/traefik-crowdsec-bouncer:latest
+    container_name: bouncer-traefik
+    environment:
+      CROWDSEC_BOUNCER_API_KEY: [YOUR KEY]
+      CROWDSEC_AGENT_HOST: crowdsec:8080
+    networks:
+      - coolify
+    depends_on:
+      - crowdsec
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
 
   logrotate:
     image: blacklabelops/logrotate
