@@ -33,10 +33,11 @@ services:
     environment:
       COLLECTIONS: >
         crowdsecurity/traefik crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules
+      CUSTOM_HOSTNAME: crowdsec
 
     security_opt:
       - no-new-privileges:true
-      
+
     # ports:
     #   - "8080:8080" # CrowdSec API
     #   - "7422:7422" # AppSec
