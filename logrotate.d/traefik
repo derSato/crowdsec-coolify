@@ -1,6 +1,6 @@
 /var/log/traefik/*.log {
   daily
-  rotate 32 
+  rotate 32
   maxage 365
   compress
   delaycompress
@@ -8,6 +8,6 @@
   notifempty
   copytruncate
   postrotate
-        docker kill --signal="USR1" coolify-proxy
-    endscript
+    docker kill --signal="USR1" coolify-proxy
+  endscript
 }
