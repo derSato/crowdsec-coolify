@@ -5,23 +5,29 @@
 Add the following lines to your `Traefik Configuration` @Servers/Configuration file
 
 ```
-   command:
-      ...
-        - "--accesslog.filepath=/var/log/traefik/access.log"
-        - "--accesslog.format=json"
-        - "--accesslog.filters.statusCodes=200-299,400-599"
-        - "--accesslog.bufferingSize=0"
-        - "--accesslog.fields.headers.names.User-Agent=keep"
-        - "--accesslog.fields.headers.names.Host=keep"
-        - "--accesslog.fields.headers.names.Content-Type=keep"
-        - "--accesslog.fields.headers.names.Referer=keep"
-        - "--accesslog.fields.headers.names.X-Forwarded-For=keep"
-        - "--accesslog.fields.request=keep"
-        - "--accesslog.fields.response=keep"
-      ...
-    volumes:
-      ...
-         - 'logs:var/log/traefik'
+  volumes:
+    ...
+      - '/var/log/traefik:/var/log/traefik'
+  command:
+    ...
+      - "--log.filePath=/var/log/traefik/traefik.log"
+      - "--log.format=json"
+      - "--log.level=DEBUG"
+      - "--log.maxsize=5000"
+      - "--log.maxage=90"
+      - "--accesslog=true"
+      - "--accesslog.filepath=/var/log/traefik/access.log"
+      - "--accesslog.format=json"
+      - "--accesslog.bufferingsize=100"
+      - "--accesslog.fields.headers.defaultmode=keep"
+      - "--accesslog.filters.statusCodes=200-299,400-599"
+
+
+
+
+      - "--accesslog.fields.request=keep"
+      - "--accesslog.fields.response=keep"
+    ...
 ```
 
 Test if the logs are created. SSH into your machiene and check with after restarting the proxy:

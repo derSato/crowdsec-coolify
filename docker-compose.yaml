@@ -23,9 +23,9 @@ services:
     networks:
       - coolify
     volumes:
-      - /opt/traefik-logs:/var/log/traefik
+      - /var/log/traefik:/var/log/traefik/:ro
       - crowdsec-db:/var/lib/crowdsec/data/
-      - crowdsec-config:/etc/crowdsec
+      - crowdsec-config:/etc/crowdsec/
     configs:
       - source: acquis.yaml
         target: /etc/crowdsec/acquis.yaml
