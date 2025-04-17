@@ -14,7 +14,6 @@ configs:
         type: appsec
       listen_addr: 0.0.0.0:7422
       source: appsec
-
 services:
   crowdsec:
     image: crowdsecurity/crowdsec:latest
@@ -23,7 +22,7 @@ services:
     networks:
       - coolify
     volumes:
-      - /var/log/traefik:/var/log/traefik/:ro
+      - /opt/traefik-logs:/var/log/traefik/:ro
       - crowdsec-db:/var/lib/crowdsec/data/
       - crowdsec-config:/etc/crowdsec/
     configs:
@@ -35,6 +34,7 @@ services:
       COLLECTIONS: >
         crowdsecurity/traefik crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules
 
+
     security_opt:
       - no-new-privileges:true
     ports:
@@ -45,7 +45,7 @@ services:
     image: docker.io/fbonalair/traefik-crowdsec-bouncer:latest
     container_name: bouncer-traefik
     environment:
-      CROWDSEC_BOUNCER_API_KEY: [YOUR KEY]
+      CROWDSEC_BOUNCER_API_KEY: YOUR_API_KEY
       CROWDSEC_AGENT_HOST: crowdsec:8080
     networks:
       - coolify
