@@ -22,7 +22,7 @@ services:
     networks:
       - coolify
     volumes:
-      - /opt/traefik-logs:/var/log/traefik/:ro
+      - /var/log/traefik:/var/log/traefik/:ro
       - crowdsec-db:/var/lib/crowdsec/data/
       - crowdsec-config:/etc/crowdsec/
     configs:
