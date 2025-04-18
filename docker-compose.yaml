@@ -37,21 +37,6 @@ services:
     security_opt:
       - no-new-privileges:true
 
-
-  bouncer-traefik:
-    image: docker.io/fbonalair/traefik-crowdsec-bouncer:latest
-    container_name: bouncer-traefik
-    environment:
-      CROWDSEC_BOUNCER_API_KEY: ${CROWSEC_API_KEY}
-      CROWDSEC_AGENT_HOST: crowdsec:8080
-    networks:
-      - coolify
-    depends_on:
-      - crowdsec
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-
   logrotate:
     image: blacklabelops/logrotate
     container_name: logrotate

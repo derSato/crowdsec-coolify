@@ -10,9 +10,11 @@ Add the following lines to your `Traefik Configuration` @Servers/Configuration f
       - '/var/log/traefik:/var/log/traefik'
   command:
     ...
+      - "--experimental.plugins.crowdsec-bouncer.modulename=github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
+      - "--experimental.plugins.crowdsec-bouncer.version=v1.4.2"
       - "--log.filePath=/var/log/traefik/traefik.log"
       - "--log.format=json"
-      - "--log.level=DEBUG"
+      - "--log.level=INFO"
       - "--log.maxsize=5000"
       - "--log.maxage=90"
       - "--accesslog=true"
@@ -24,7 +26,7 @@ Add the following lines to your `Traefik Configuration` @Servers/Configuration f
 
 
 
-      <!-- Optional -->
+      <!-- For APPSEC -->
       - "--accesslog.fields.request=keep"
       - "--accesslog.fields.response=keep"
     ...
@@ -41,31 +43,32 @@ nano access.log
 
 ## 2. Install this Repository as a Docker Compose Project
 
-Point to this directory and deplot it with /docker-compose.yaml. 
-
+Point to this directory and deplot it with /docker-compose.yaml.
 
 ## 3. Activate Dashboaard
 
-WHile checking your logs you see the new installed containers name. it should look something like [Crowdsec container name]-[Random numbers and letters] Optionally use 'docker ps' to find the container name with ssh. SSH into your machiene and run:
+While checking your logs you see the new installed containers name. it should look something like [Crowdsec container name]-[Random numbers and letters] Optionally use 'docker ps' to find the container name with ssh. SSH into your machiene and run:
 
 ```
 docker exec -it [CONTAINER_NAME] cscli bouncers add traefik-bouncer
 ```
 
-This should return the API ket for 'traefik bouncer'
+This returns the API key for 'crowdsecs api'
 
+## 4. Enable CrowdSec Bouncer within the Dynamic Configuration (Middleware)
 
-## 4.  Enable CrowdSec Bouncer within the Dynamic Configuration (Middleware)
-
-Now we add middleware to our Dynamic Traefik configuration.
+Create a new File called 'crowdsec.yaml' in the 'Middleware' section of your Dynamic Configuration (Middleware)
 
 ```
 http:
-  middlewares:    
-    crowdsec-bouncer:
-      forwardauth:
-        address: http://bouncer-traefik:8080/api/v1/forwardAuth
-        trustForwardHeader: true
+  middlewares:
+    crowdsec:
+      plugin:
+        crowdsec-bouncer:
+          enabled: true
+          crowdsecLapiKey: YOUR_API_KEY
+          crowdsecAppsecEnabled: true
+          crowdsecAppsecHost: 'crowdsec:7422'
 ```
 
 ## 5. Apply Middleware to All HTTPS Services (Globally)
@@ -73,8 +76,8 @@ http:
 To globally enable CrowdSec for all requests, update your command: in Traefik:
 
 ```
-command:
-  - "--entrypoints.https.http.middlewares=crowdsec-bouncer@file"
+    command:
+      - "--entrypoints.https.http.middlewares=crowdsec@file,ratelimit@file"
 ```
 
 🧠 This applies the middleware on the https entryPoint — meaning all traffic routed via HTTPS will pass through CrowdSec first.
@@ -82,8 +85,8 @@ command:
 Want to test on specific routers first instead? You can use labels like:
 
 ```
-labels:
-  - "traefik.http.routers.myservice.middlewares=crowdsec-bouncer@file"
+    labels:
+      - "traefik.http.routers.myservice.middlewares=crowdsec-bouncer@file"
 ```
 
 ## 6. Test the configurtation
@@ -94,7 +97,17 @@ Like before access the crowdsec cli thru the cordsc container:
 docker exec -it [CONTAINER_NAME] cscli decisions add --ip [YOUR IP]
 ```
 
-Connect to any exposed URL and check if it worked.
+Connect to any exposed URL and check if the bouncer worked. Also the following command shows if all the connections are handled by appsec after viewing any https page
+
+```
+docker exec -it [CONTAINER_NAME] cscli metrics show appsec
+```
+
+Respectively for crowdsec
+
+```
+docker exec -it [CONTAINER_NAME] cscli decisions list
+```
 
 ## 7. Front Security
 
@@ -112,7 +125,6 @@ Cloudflares list can be found at [https://www.cloudflare.com/ips/](https://www.c
 
 **Thats it!**
 
-
 ## Bonus: Rate Limiter
 
 Inside Dynamic Configuration (Middleware) add a new File:
@@ -125,10 +137,11 @@ http:
         average: 100
         burst: 200
 ```
+
 Inside traefik.yaml
 
 ```
     command:
-      - "--entrypoints.https.http.middlewares=crowdsec-bouncer@file,ratelimit@file"
+      - "--entrypoints.https.http.middlewares=crowdsec@file,ratelimit@file"  # This Replaces the line of step 5
       - "--entrypoints.http.http.middlewares=ratelimit@file"
 ```
