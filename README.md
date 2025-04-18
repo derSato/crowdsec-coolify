@@ -9,7 +9,7 @@ Add the following lines to your `Traefik Configuration` @Servers/Configuration f
     ...
       - '/var/log/traefik:/var/log/traefik'
   command:
-    ...
+    ...     
       - "--experimental.plugins.crowdsec-bouncer.modulename=github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
       - "--experimental.plugins.crowdsec-bouncer.version=v1.4.2"
       - "--log.filePath=/var/log/traefik/traefik.log"
@@ -23,12 +23,6 @@ Add the following lines to your `Traefik Configuration` @Servers/Configuration f
       - "--accesslog.bufferingsize=100"
       - "--accesslog.fields.headers.defaultmode=keep"
       - "--accesslog.filters.statusCodes=200-299,400-599"
-
-
-
-      <!-- For APPSEC -->
-      - "--accesslog.fields.request=keep"
-      - "--accesslog.fields.response=keep"
     ...
 ```
 
@@ -78,6 +72,7 @@ To globally enable CrowdSec for all requests, update your command: in Traefik:
 ```
     command:
       - "--entrypoints.https.http.middlewares=crowdsec@file,ratelimit@file"
+
 ```
 
 🧠 This applies the middleware on the https entryPoint — meaning all traffic routed via HTTPS will pass through CrowdSec first.
@@ -123,6 +118,10 @@ Traefik.yaml
 
 Cloudflares list can be found at [https://www.cloudflare.com/ips/](https://www.cloudflare.com/ips/)
 
+## 8. Crowdsec Dashboard
+
+Optionally you can do step 3 to Connect with your console with this link: [https://app.crowdsec.net/](https://app.crowdsec.net/security-engines/setup?distribution=linux)
+
 **Thats it!**
 
 ## Bonus: Rate Limiter
@@ -144,4 +143,21 @@ Inside traefik.yaml
     command:
       - "--entrypoints.https.http.middlewares=crowdsec@file,ratelimit@file"  # This Replaces the line of step 5
       - "--entrypoints.http.http.middlewares=ratelimit@file"
+```
+
+
+## Error Handling: 
+
+### bind 0.0.0.0 is already in use
+
+You can try this:
+
+```
+systemctl stop docker
+systemctl disable docker.service
+systemctl disable docker.socket
+docker system prune
+systemctl enable docker.service
+systemctl enable docker.socket
+systemctl start docker
 ```
