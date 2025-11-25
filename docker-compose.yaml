@@ -4,7 +4,7 @@ configs:
   acquis.yaml:
     content: |
       filenames:
-        - /var/log/traefik/*
+        - /var/log/traefik/access.log
       labels:
         type: traefik
   appsec.yaml:
